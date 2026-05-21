@@ -55,15 +55,19 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Image
+        env:
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          MLFLOW_TRACKING_URI: https://dagshub.com/Rahmahf074/Eksperimen_SML_RahmaHidayatiFitrah.mlflow
+          MLFLOW_TRACKING_USERNAME: Rahmahf074
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          mlflow models build-docker \
-            --model-uri "runs:/$(python -c "
-          import mlflow
-          import dagshub
-          import os
-          dagshub.init(repo_owner='Rahmahf074', repo_name='Eksperimen_SML_RahmaHidayatiFitrah', mlflow=True)
-          runs = mlflow.search_runs(order_by=['start_time DESC'], max_results=1)
-          print(runs.iloc[0]['run_id'])
-          ")/model" \
-            --name "rahmahidayatifitrah/wine-quality-model"
+          docker build -t rahmahidayatifitrah/wine-quality-model:latest -f - . <<'EOF'
+          FROM python:3.11-slim
+          WORKDIR /app
+          COPY MLProject/requirements.txt* ./
+          RUN pip install mlflow==2.19.0 pandas numpy scikit-learn
+          COPY MLProject/ ./
+          EXPOSE 8080
+          CMD ["python", "modelling.py"]
+          EOF
           docker push rahmahidayatifitrah/wine-quality-model:latest
