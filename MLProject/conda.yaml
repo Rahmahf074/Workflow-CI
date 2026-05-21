@@ -1,0 +1,15 @@
+name: wine-quality-env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - mlflow==2.19.0
+      - pandas==2.1.4
+      - numpy==1.26.2
+      - scikit-learn==1.3.2
+      - matplotlib==3.8.2
+      - seaborn==0.13.0
+      - dagshub==0.7.0
