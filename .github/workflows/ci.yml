@@ -24,14 +24,17 @@ jobs:
         run: |
           pip install mlflow==2.19.0 pandas numpy scikit-learn matplotlib seaborn dagshub
 
-      - name: Train model
+      - name: Train model via MLflow Project
         env:
           DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          MLFLOW_TRACKING_URI: https://dagshub.com/Rahmahf074/Eksperimen_SML_RahmaHidayatiFitrah.mlflow
+          MLFLOW_TRACKING_USERNAME: Rahmahf074
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          python MLProject/modelling.py \
-            --n_estimators 200 \
-            --max_depth 10 \
-            --min_samples_split 5
+          mlflow run MLProject/ --entry-point main --env-manager=local \
+            -P n_estimators=200 \
+            -P max_depth=10 \
+            -P min_samples_split=5
 
       - name: Upload artifacts to GitHub
         uses: actions/upload-artifact@v4
@@ -58,11 +61,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Image
-        env:
-          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-          MLFLOW_TRACKING_URI: https://dagshub.com/Rahmahf074/Eksperimen_SML_RahmaHidayatiFitrah.mlflow
-          MLFLOW_TRACKING_USERNAME: Rahmahf074
-          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           docker build -t rahmahidayatifitrah/diabetes-model:latest -f - . <<'EOF'
           FROM python:3.11-slim
