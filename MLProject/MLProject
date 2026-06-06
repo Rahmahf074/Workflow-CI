@@ -1,4 +1,4 @@
-name: wine-quality-mlops
+name: diabetes-mlops
 
 conda_env: conda.yaml
 
