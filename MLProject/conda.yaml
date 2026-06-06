@@ -1,4 +1,4 @@
-name: wine-quality-env
+name: diabetes-mlops-env
 channels:
   - defaults
   - conda-forge
