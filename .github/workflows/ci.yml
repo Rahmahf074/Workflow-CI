@@ -28,23 +28,21 @@ jobs:
         env:
           DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          python MLProject/modelling.py \
-            --n_estimators 200 \
-            --max_depth 10 \
-            --min_samples_split 5
+          cd Membangun_model
+          python modelling_tuning.py
 
       - name: Upload artifacts to GitHub
         uses: actions/upload-artifact@v4
         with:
           name: model-artifacts
-          path: artifacts/
+          path: Membangun_model/artifacts/
 
       - name: Commit artifacts
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git pull --rebase origin main
-          git add artifacts/
+          git add Membangun_model/artifacts/ || true
           git diff --staged --quiet || git commit -m "Auto: update model artifacts"
           git push
 
@@ -61,13 +59,12 @@ jobs:
           MLFLOW_TRACKING_USERNAME: Rahmahf074
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          docker build -t rahmahidayatifitrah/wine-quality-model:latest -f - . <<'EOF'
+          docker build -t rahmahidayatifitrah/diabetes-model:latest -f - . <<'EOF'
           FROM python:3.11-slim
           WORKDIR /app
-          COPY MLProject/requirements.txt* ./
           RUN pip install mlflow==2.19.0 pandas numpy scikit-learn
-          COPY MLProject/ ./
-          EXPOSE 8080
-          CMD ["python", "modelling.py"]
+          COPY Membangun_model/ /app/
+          EXPOSE 5000
+          CMD ["python", "modelling_tuning.py"]
           EOF
-          docker push rahmahidayatifitrah/wine-quality-model:latest
+          docker push rahmahidayatifitrah/diabetes-model:latest
