@@ -28,21 +28,23 @@ jobs:
         env:
           DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          cd Membangun_model
-          python modelling_tuning.py
+          python MLProject/modelling.py \
+            --n_estimators 200 \
+            --max_depth 10 \
+            --min_samples_split 5
 
       - name: Upload artifacts to GitHub
         uses: actions/upload-artifact@v4
         with:
           name: model-artifacts
-          path: Membangun_model/artifacts/
+          path: artifacts/
 
       - name: Commit artifacts
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git pull --rebase origin main
-          git add Membangun_model/artifacts/ || true
+          git add artifacts/ || true
           git diff --staged --quiet || git commit -m "Auto: update model artifacts"
           git push
 
@@ -63,8 +65,8 @@ jobs:
           FROM python:3.11-slim
           WORKDIR /app
           RUN pip install mlflow==2.19.0 pandas numpy scikit-learn
-          COPY Membangun_model/ /app/
+          COPY MLProject/ /app/
           EXPOSE 5000
-          CMD ["python", "modelling_tuning.py"]
+          CMD ["python", "modelling.py"]
           EOF
           docker push rahmahidayatifitrah/diabetes-model:latest
