@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report)
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score, confusion_matrix)
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -24,17 +24,17 @@ dagshub.init(
     mlflow=True
 )
 
-df_train = pd.read_csv('MLProject/winequality_preprocessing.csv')
-df_test  = pd.read_csv('MLProject/winequality_test.csv')
+df_train = pd.read_csv('MLProject/diabetes_preprocessing.csv')
+df_test  = pd.read_csv('MLProject/diabetes_test.csv')
 
-X_train = df_train.drop('quality', axis=1)
-y_train = df_train['quality']
-X_test  = df_test.drop('quality', axis=1)
-y_test  = df_test['quality']
+X_train = df_train.drop('Outcome', axis=1)
+y_train = df_train['Outcome']
+X_test  = df_test.drop('Outcome', axis=1)
+y_test  = df_test['Outcome']
 
-print(f" Train: {X_train.shape} | Test: {X_test.shape}")
+print(f" Train set: {X_train.shape} | Test set: {X_test.shape}")
 
-with mlflow.start_run(run_name="RandomForest_CI"):
+with mlflow.start_run(run_name="RandomForest_Diabetes_CI"):
 
     model = RandomForestClassifier(
         n_estimators=args.n_estimators,
@@ -49,9 +49,9 @@ with mlflow.start_run(run_name="RandomForest_CI"):
     y_pred = model.predict(X_test)
 
     acc  = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred, average='weighted')
-    rec  = recall_score(y_test, y_pred, average='weighted')
-    f1   = f1_score(y_test, y_pred, average='weighted')
+    prec = precision_score(y_test, y_pred)
+    rec  = recall_score(y_test, y_pred)
+    f1   = f1_score(y_test, y_pred)
 
     mlflow.log_param("n_estimators", args.n_estimators)
     mlflow.log_param("max_depth", args.max_depth)
@@ -62,10 +62,11 @@ with mlflow.start_run(run_name="RandomForest_CI"):
     mlflow.log_metric("f1_score", f1)
 
     os.makedirs("artifacts", exist_ok=True)
+    
     cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-    plt.title('Confusion Matrix - CI Run')
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+    plt.title('Confusion Matrix - CI Run (Diabetes)')
     plt.ylabel('Actual')
     plt.xlabel('Predicted')
     plt.tight_layout()
@@ -79,7 +80,8 @@ with mlflow.start_run(run_name="RandomForest_CI"):
     ).sort_values(ascending=False)
     plt.figure(figsize=(10, 6))
     feat_imp.plot(kind='bar', color='steelblue')
-    plt.title('Feature Importance - CI Run')
+    plt.title('Feature Importance - CI Run (Diabetes)')
+    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     plt.savefig('artifacts/feature_importance.png', dpi=150)
     plt.close()
@@ -89,6 +91,4 @@ with mlflow.start_run(run_name="RandomForest_CI"):
 
     print(f" Training selesai!")
     print(f"   Accuracy : {acc:.4f}")
-    print(f"   Precision: {prec:.4f}")
-    print(f"   Recall   : {rec:.4f}")
-    print(f"   F1 Score : {f1:.4f}")  
+    print(f"   F1 Score : {f1:.4f}")
