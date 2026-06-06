@@ -24,8 +24,8 @@ dagshub.init(
     mlflow=True
 )
 
-df_train = pd.read_csv('MLProject/diabetes_preprocessing.csv')
-df_test  = pd.read_csv('MLProject/diabetes_test.csv')
+df_train = pd.read_csv('diabetes_preprocessing.csv')
+df_test  = pd.read_csv('diabetes_test.csv')
 
 X_train = df_train.drop('Outcome', axis=1)
 y_train = df_train['Outcome']
